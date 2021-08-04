@@ -856,9 +856,8 @@ bool errorfolder = false;
 
 string subfolder;
 
-
 subfolder = paramsSim->getDir(0) + "Inputs";
-const char* inputs = subfolder.c_str();
+const char *inputs = subfolder.c_str();
 if (!is_directory(inputs)) errorfolder = true;
 subfolder = paramsSim->getDir(0) + "Outputs";
 const char *outputs = subfolder.c_str();
@@ -866,7 +865,6 @@ if (!is_directory(outputs)) errorfolder = true;
 subfolder = paramsSim->getDir(0) + "Output_Maps";
 const char *outputmaps = subfolder.c_str();
 if (!is_directory(outputmaps)) errorfolder = true;
-
 
 return errorfolder;
 }
@@ -876,7 +874,7 @@ return errorfolder;
 void PreReproductionOutput(Landscape *pLand,Community *pComm,int rep,int yr,int gen)
 {
 #if RSDEBUG || VCL
-	landParams ppLand = pLand->getLandParams();
+landParams ppLand = pLand->getLandParams();
 #endif
 simParams sim = paramsSim->getSim();
 simView v = paramsSim->getViews();
@@ -895,12 +893,7 @@ DEBUGLOG << "PreReproductionOutput(): 11112 outRange=" << sim.outRange
 //DEBUGLOG << "PreReproductionOutput(): 22222 " << endl;
 #endif
 
-//emigCanvas ecanv;
-//trfrCanvas tcanv;
-traitCanvas tcanv{};
-//for (int i = 0; i < 6; i++) {
-//	ecanv.pcanvas[i] = 0; tcanv.pcanvas[i] = 0;
-//}
+traitCanvas tcanv;
 for (int i = 0; i < NTRAITS; i++) {
 		tcanv.pcanvas[i] = 0;
 }
@@ -908,9 +901,6 @@ for (int i = 0; i < NTRAITS; i++) {
 // trait outputs and visualisation
 
 if (v.viewTraits) {
-//	ecanv = SetupEmigCanvas();
-//	tcanv = SetupTrfrCanvas();
-//	tcanv = SetupTraitCanvas(v.viewGrad);
 	tcanv = SetupTraitCanvas();
 }
 
@@ -918,7 +908,6 @@ if (v.viewTraits
 || ((sim.outTraitsCells && yr >= sim.outStartTraitCell && yr%sim.outIntTraitCell == 0) ||
 		(sim.outTraitsRows && yr >= sim.outStartTraitRow && yr%sim.outIntTraitRow == 0)))
 {
-//	pComm->outTraits(ecanv,tcanv,pSpecies,rep,yr,gen);
 	pComm->outTraits(tcanv,pSpecies,rep,yr,gen);
 }
 
@@ -1376,9 +1365,12 @@ if (dem.stageStruct) {
 }
 else {
 	outPar << endl << "CARRYING CAPACITIES:" << endl;
-
 }
-for (int i = 0; i < ppLand.nHab; i++) {
+int nhab = ppLand.nHab;             
+if (ppLand.generated) { 
+	if (ppGenLand.continuous) nhab = 1;
+}
+for (int i = 0; i < nhab; i++) {
 	k = pSpecies->getHabK(i) * (10000.0/(float)(ppLand.resol*ppLand.resol));
 	if (!ppLand.generated && ppLand.rasterType == 0) { // imported & habitat codes
 		outPar << "Habitat " << pLandscape->getHabCode(i) << ": \t";

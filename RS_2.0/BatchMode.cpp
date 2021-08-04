@@ -943,7 +943,8 @@ else return nSimuls;
 
 int ParseLandFile(int landtype, string indir)
 {
-string fname,header,intext,ftype,costfile;
+//string fname,header,intext,ftype,costfile;
+string fname,header,intext,ftype;
 int j,inint,line;
 float infloat;
 rasterdata patchraster,spdistraster,costraster;
@@ -1068,10 +1069,10 @@ if (landtype == 0 || landtype == 2) { // real landscape
 			}
 		}
 
-		// check initial distribution map filename
+		// check cost map filename
 		ftype = "CostMapFile";
-		bLandFile >> costfile;
-		if (costfile == "NULL") {
+		bLandFile >> name_costfile;
+		if (name_costfile == "NULL") {
 			if (transfer == 1) { // SMS
 				if (landtype == 2) {
 					BatchError(filetype,line,0," "); errors++;
@@ -1081,7 +1082,7 @@ if (landtype == 0 || landtype == 2) { // real landscape
 		}
 		else {
 			if (transfer == 1) { // SMS
-				fname = indir + costfile;
+				fname = indir + name_costfile;
 				costraster = CheckRasterFile(fname);
 				if (costraster.ok) {
 					if (costraster.cellsize == resolution) {
@@ -1126,7 +1127,7 @@ if (landtype == 0 || landtype == 2) { // real landscape
 			batchlog << "Checking " << ftype << " " << fname << endl;
 			bDynLandFile.open(fname.c_str());
 			if (bDynLandFile.is_open()) {
-				int something = ParseDynamicFile(indir,costfile);
+				int something = ParseDynamicFile(indir,name_costfile);
 				if (something < 0) {
 						errors++;
 				}
@@ -1445,7 +1446,7 @@ while (change != -98765) {
 		}
 	}
 
-	// check costs filename
+	// check costs change filename
 	ftype = "CostChangeFile";
 	bDynLandFile >> intext;
 	if (intext == "NULL") {
@@ -2029,7 +2030,7 @@ if (errors > 0) {
 
 // Parse data lines
 int line = 1;
-simCheck current{}, prev{};
+simCheck current, prev;
 simul = -98765;
 prev.simul = -999;
 prev.simlines = prev.reqdsimlines = 0;
@@ -2038,6 +2039,7 @@ bEmigrationFile >> simul;
 if (simul != firstsimul) {
 	BatchError(filetype,line,111,"Simulation"); errors++;
 }
+current.simul = 0; //dummy line to prevent warning message in VisualStudio 2019
 while (simul != -98765) {
 	// read and validate columns relating to stage and sex-dependency and to IIV
 	bEmigrationFile >> densdep >> usefullkern >> stagedep >> sexdep;
@@ -2342,7 +2344,7 @@ if (errors > 0 || morthaberrors > 0 || costerrors > 0 || hrerrors > 0) {
 
 // Parse data lines
 int line = 1;
-simCheck current{}, prev{};
+simCheck current, prev;
 simul = -98765;
 prev.simul = -999;
 prev.simlines = prev.reqdsimlines = 0;
@@ -2351,6 +2353,7 @@ bTransferFile >> simul;
 if (simul != firstsimul) {
 	BatchError(filetype,line,111,"Simulation"); errors++;
 }
+current.simul = 0; //dummy line to prevent warning message in VisualStudio 2019
 while (simul != -98765) {
 
 	switch (transfer) {
@@ -2590,7 +2593,7 @@ while (simul != -98765) {
 			}
 			for (i = 0; i < maxNhab; i++) {
 				bTransferFile >> costhab;
-				if (name_costfile == "NULL") {
+				if (name_costfile == "NULL") { 
 					if (costhab < 1) {
 						colheader = "CostHab" + Int2Str(i+1);
 						BatchError(filetype,line,11,colheader); errors++;
@@ -2786,7 +2789,7 @@ if (errors > 0) {
 
 // Parse data lines
 int line = 1;
-simCheck current{}, prev{};
+simCheck current, prev;
 simul = -98765;
 prev.simul = -999;
 prev.simlines = prev.reqdsimlines = 0;
@@ -2795,6 +2798,7 @@ bSettlementFile >> simul;
 if (simul != firstsimul) {
 	BatchError(filetype,line,111,"Simulation"); errors++;
 }
+current.simul = 0; //dummy line to prevent warning message in VisualStudio 2019
 while (simul != -98765) {
 	if (transfer == 0) 
 	{ // dispersal kernel
@@ -2976,7 +2980,7 @@ if (errors > 0) {
 
 // Parse data lines
 int line = 1;
-simCheck current{},prev{};
+simCheck current,prev;
 simul = -98765;
 prev.simul = -999;
 prev.simlines = prev.reqdsimlines = 0;
@@ -2985,6 +2989,7 @@ bGeneticsFile >> simul;
 if (simul != firstsimul) {
 	BatchError(filetype,line,111,"Simulation"); errors++;
 }
+current.simul = 0; //dummy line to prevent warning message in VisualStudio 2019
 while (simul != -98765) {
 	// read and validate columns relating to stage and sex-dependency (NB no IIV here)
 	bGeneticsFile >> arch >> nLoci >> filename
@@ -3253,7 +3258,7 @@ if (errors > 0 || propnerrors > 0) {
 // Parse data lines
 int line = 1;
 int err;
-simCheck current{}, prev{};
+simCheck current, prev;
 bool checkfile;
 string filename,ftype2,fname;
 vector <string> indsfiles;
@@ -3266,6 +3271,7 @@ bInitFile >> simul;
 if (simul != firstsimul) {
 	BatchError(filetype,line,111,"Simulation"); errors++;
 }
+current.simul = 0; //dummy line to prevent warning message in VisualStudio 2019
 while (simul != -98765) {
 	current = CheckStageSex(filetype,line,simul,prev,0,0,0,0,0,true,false);
 	if (current.newsimul) simuls++;
@@ -3560,7 +3566,7 @@ simCheck CheckStageSex(string filetype, int line, int simul, simCheck prev,
 	int stagedep, int sexdep, int stage, int sex, int indvar,
 	bool checklines, bool stgdepindvarok)
 {
-simCheck current{};
+simCheck current;
 current.errors = 0;
 int iii;
 
@@ -3943,8 +3949,7 @@ if (landtype == 9) { //artificial landscape
 #if RSDEBUG
 DEBUGLOG << "ReadLandFile(): artificial: "  << endl;
 #endif
-	ppLand.nHab = 2;
-  ppLand.rasterType = 9;
+	ppLand.rasterType = 9;
 	landfile >> ppLand.landNum >> ppGenLand.fractal >> ppGenLand.continuous
 		>> ppLand.dimX >> ppLand.dimY >> ppGenLand.minPct >> ppGenLand.maxPct
 		>> ppGenLand.propSuit >> ppGenLand.hurst;
@@ -3962,8 +3967,11 @@ DEBUGLOG << "ReadLandFile(): artificial: "  << endl;
 	// fractal landscape (including discrete), as they are passed to the fractal generator
 	// NOTE that will not have been checked for a discrete landscape
 	if (ppGenLand.fractal && !ppGenLand.continuous) { ppGenLand.minPct = 1; ppGenLand.maxPct = 100; }
+	if (ppGenLand.continuous) ppLand.nHab = 2;		
+	else ppLand.nHab = 1;
 #if RSDEBUG
 DEBUGLOG << "ReadLandFile(): ppLand.landNum=" << ppLand.landNum
+	<< " continuous=" << ppGenLand.continuous << " ppLand.nHab=" << ppLand.nHab
 	<< " ppLand.dimX=" << ppLand.dimX << " ppLand.dimY=" << ppLand.dimY
 	<< " ppLand.maxX=" << ppLand.maxX << " ppLand.maxY=" << ppLand.maxY
 	<< " propSuit=" << ppGenLand.propSuit
@@ -4162,8 +4170,8 @@ float minR,maxR,minK,maxK;
 parameters >> env.ac >> env.std >> minR >> maxR >> minK >> maxK;
 if (env.inK) {
 	float minKK,maxKK;
-	minKK = minK * ((((float)paramsLand.resol * (float)paramsLand.resol)) / 10000.0f);
-	maxKK = maxK * ((((float)paramsLand.resol * (float)paramsLand.resol)) / 10000.0f);
+	minKK = minK * (((float)paramsLand.resol * (float)paramsLand.resol) / 10000.0f);
+	maxKK = maxK * (((float)paramsLand.resol * (float)paramsLand.resol) / 10000.0f);
 	pSpecies->setMinMax(minKK,maxKK);
 }
 else pSpecies->setMinMax(minR,maxR);
@@ -4182,18 +4190,29 @@ pSpecies->setDemogr(dem);
 float k;
 
 if (landtype == 9) { // artificial landscape
-	// only one value of K is read, but the first 'habitat' is the matrix where K = 0
-	pSpecies->createHabK(2);
+	// only one value of K is read, but it must be applied as the second habitat if the
+	// landscape is discrete (the first is the matrix where K = 0) or as the first 
+	// (only) habitat if the landscape is continuous
+	genLandParams genland = pLandscape->getGenLandParams(); 
+	int nhab;
+	if (genland.continuous) nhab = 1;		
+	else nhab = 2;  
+	pSpecies->createHabK(nhab);
 	parameters >> k;
 	k *= (((float)paramsLand.resol*(float)paramsLand.resol))/10000.0f;
-	pSpecies->setHabK(0,0);
-	pSpecies->setHabK(1,k);
+	if (genland.continuous) {
+		pSpecies->setHabK(0,k);		
+	}
+	else {
+		pSpecies->setHabK(0,0);
+		pSpecies->setHabK(1,k);
+	}
 }
 else {
 	pSpecies->createHabK(paramsLand.nHabMax);
 	for (int i = 0; i < paramsLand.nHabMax; i++) {
 		parameters >> k;
-		k *= (((float)paramsLand.resol*(float)paramsLand.resol))/10000.0f;
+		k *= ((float)paramsLand.resol*(float)paramsLand.resol)/10000.0f;
 		pSpecies->setHabK(i,k);
 	}
 }
@@ -4326,7 +4345,7 @@ int ReadTransitionMatrix(short nstages,short nsexesDem,short hab,short season)
 //#endif // RS_CONTAIN 
 int ii;
 int minAge;
-float ss, dd; 
+float ss,dd; 
 string header;
 demogrParams dem = pSpecies->getDemogr();
 //stageParams sstruct = pSpecies->getStage();
@@ -4625,8 +4644,8 @@ bool firstline = true;
 demogrParams dem = pSpecies->getDemogr();
 stageParams sstruct = pSpecies->getStage();
 emigRules emig = pSpecies->getEmig();
-emigTraits etraits{};
-emigParams eparams{};
+emigTraits etraits;
+emigParams eparams;
 
 // set no.of lines assuming maximum stage- and sex-dependency
 if (sstruct.nStages == 0) Nlines = sexesDisp;
@@ -4866,9 +4885,9 @@ int TransferType; // new local variable to replace former global variable
 if (trfr.moveModel) TransferType = trfr.moveType; else TransferType = 0;
 
 int sexKernels = 0;
-trfrKernTraits k{};
-trfrMovtTraits move{};
-trfrKernParams kparams{};
+trfrKernTraits k;
+trfrMovtTraits move;
+trfrKernParams kparams;
 trfrScales scale = pSpecies->getTrfrScales();
 string CostsFile;
 trfrSMSParams smsparams;
@@ -4927,13 +4946,13 @@ case 0: // negative exponential dispersal kernel
 
 		case 0: // no sex / stage dependence
 			transFile >> k.meanDist1 >> k.meanDist2 >> k.probKern1;
-			pSpecies->setKernTraits(0,0,k,(float)paramsLand.resol);
+			pSpecies->setKernTraits(0,0,k,paramsLand.resol);
 			if (trfr.indVar) {
 				transFile >> kparams.dist1Mean >> kparams.dist1SD
 					>> kparams.dist2Mean >> kparams.dist2SD
 					>> kparams.PKern1Mean >> kparams.PKern1SD;
 //				MAXDist = kparams.maxDist1;
-				pSpecies->setKernParams(0,0,kparams,(float)paramsLand.resol);
+				pSpecies->setKernParams(0,0,kparams,(double)paramsLand.resol);
 			}
 			else {
 				for (int i = 0; i < 6; i++) transFile >> tttt;
@@ -4969,7 +4988,7 @@ case 0: // negative exponential dispersal kernel
 					transFile >> k.meanDist1; k.meanDist2 = k.meanDist1; k.probKern1 = 1.0;
 					for (int i = 0; i < 8; i++) transFile >> tttt;
 				}
-			pSpecies->setKernTraits(0,sex,k,(float)paramsLand.resol);
+			pSpecies->setKernTraits(0,sex,k,paramsLand.resol);
 			}
 			break;
 
@@ -4982,7 +5001,7 @@ case 0: // negative exponential dispersal kernel
 			else {
 				transFile >> k.meanDist1; k.meanDist2 = k.meanDist1; k.probKern1 = 1.0;
 				for (int i = 0; i < 8; i++) transFile >> tttt;
-			pSpecies->setKernTraits(stage,0,k,(float)paramsLand.resol);
+			pSpecies->setKernTraits(stage,0,k,paramsLand.resol);
 			}
 			break;
 
@@ -4995,7 +5014,7 @@ case 0: // negative exponential dispersal kernel
 			else {
 				transFile >> k.meanDist1; k.meanDist2 = k.meanDist1; k.probKern1 = 1.0;
 				for (int i = 0; i < 8; i++) transFile >> tttt;
-			pSpecies->setKernTraits(stage,sex,k,(float)paramsLand.resol);
+			pSpecies->setKernTraits(stage,sex,k,paramsLand.resol);
 			}
 			break;
 		} // end of switch (sexkernels)
@@ -5013,7 +5032,7 @@ case 0: // negative exponential dispersal kernel
 
 		// mortality
 		if (stage == 0 && sex == 0) {
-			trfrMortParams mort{};
+			trfrMortParams mort;
 			transFile >> mort.fixedMort >> mort.mortAlpha >> mort.mortBeta;
 			pSpecies->setMortParams(mort);
 		}
@@ -5140,18 +5159,19 @@ DEBUGLOG << "ReadTransfer(): nHabMax=" << paramsLand.nHabMax << " i=" << i
 
 case 2: // CRW
 
-{trfrCRWParams mparams{};
+	{
+	trfrCRWParams mparams;
 
-transFile >> simulation >> iiii;
-if (iiii == 0) trfr.indVar = false; else trfr.indVar = true;
+	transFile >> simulation >> iiii;
+	if (iiii == 0) trfr.indVar = false; else trfr.indVar = true;
 
-transFile >> move.stepLength >> move.rho
->> mparams.stepLgthMean >> mparams.stepLgthSD >> mparams.rhoMean >> mparams.rhoSD;
-transFile >> scale.stepLScale >> scale.rhoScale;
-transFile >> jjjj >> iiii >> move.stepMort;
-if (iiii == 0) trfr.habMort = false; else trfr.habMort = true;
-if (jjjj == 0) move.straigtenPath = false; else move.straigtenPath = true;
-pSpecies->setTrfrScales(scale);
+	transFile >> move.stepLength >> move.rho
+		>> mparams.stepLgthMean >> mparams.stepLgthSD >> mparams.rhoMean >> mparams.rhoSD;
+	transFile >> scale.stepLScale >> scale.rhoScale;
+	transFile >> jjjj >> iiii >> move.stepMort;
+	if (iiii == 0) trfr.habMort = false; else trfr.habMort = true;
+	if (jjjj == 0) move.straigtenPath = false; else move.straigtenPath = true;
+	pSpecies->setTrfrScales(scale);
 #if RSDEBUG
 DEBUGLOG << "ReadTransfer(): simulation=" << simulation
 << " paramsLand.rasterType=" << paramsLand.rasterType
@@ -5163,26 +5183,26 @@ DEBUGLOG << "ReadTransfer(): simulation=" << simulation
 #endif
 
 //Habitat-dependent per step mortality
-if (trfr.habMort && paramsLand.rasterType != 0) error = 434;
+	if (trfr.habMort && paramsLand.rasterType != 0) error = 434;
 
-if (!paramsLand.generated && paramsLand.rasterType == 0) { // real habitat codes landscape
-	if (trfr.habMort)
-	{ // habitat-dependent step mortality
-		for (int i = 0; i < paramsLand.nHabMax; i++) {
-			transFile >> tttt;
-			pSpecies->setHabMort(i, tttt);
+	if (!paramsLand.generated && paramsLand.rasterType == 0) { // real habitat codes landscape
+		if (trfr.habMort)
+		{ // habitat-dependent step mortality
+			for (int i = 0; i < paramsLand.nHabMax; i++) {
+				transFile >> tttt;
+				pSpecies->setHabMort(i, tttt);
+			}
+		}
+		else { // constant step mortality
+			for (int i = 0; i < paramsLand.nHabMax; i++) transFile >> tttt;
 		}
 	}
-	else { // constant step mortality
-		for (int i = 0; i < paramsLand.nHabMax; i++) transFile >> tttt;
+	pSpecies->setTrfr(trfr);
+	pSpecies->setMovtTraits(move);
+	pSpecies->setCRWParams(0, 0, mparams);
 	}
-}
-pSpecies->setTrfr(trfr);
-pSpecies->setMovtTraits(move);
-pSpecies->setCRWParams(0, 0, mparams);
-}
 
-break; // end of CRW
+	break; // end of CRW
 
 
 default:
@@ -5208,9 +5228,9 @@ stageParams sstruct = pSpecies->getStage();
 trfrRules trfr = pSpecies->getTrfr();
 settleType sett = pSpecies->getSettle();
 settleRules srules;
-settleSteps ssteps{};
-settleTraits settleDD{};
-settParams sparams{};
+settleSteps ssteps;
+settleTraits settleDD;
+settParams sparams;
 int sexSettle = 0,settType = 0,densdep,indvar,findmate;
 
 #if RSDEBUG
@@ -5548,7 +5568,7 @@ settleType sett = pSpecies->getSettle();
 int simulation,arch;
 string archfile;
 int error = 0;
-genomeData g{};
+genomeData g;
 demogrParams dem = pSpecies->getDemogr();
 
 if (option == 0) { // open file and read header line
@@ -5797,7 +5817,7 @@ if (option == 9) { // close file
 }
 
 // Read data lines;
-initInd iind{};
+initInd iind;
 int ninds;
 int totinds = 0;
 iind.year = -98765;
@@ -6073,7 +6093,7 @@ DebugGUI("RunBatch(): simulation i=" + Int2Str(i));
 			if (geneticsFile == "NULL") {
 				// use default genetics parameters
 				// (by setting illegal values except for diploid)
-				genomeData g{};
+				genomeData g;
 				g.nLoci = -1; g.probMutn = g.probCrossover = g.alleleSD = g.mutationSD = -1.0;
 				if (reproductn == 0) g.diploid = false; else g.diploid = true;
 				g.neutralMarkers = g.trait1Chromosome = false;

@@ -34,7 +34,7 @@ Methods in Ecology and Evolution, 5, 388-396. doi: 10.1111/2041-210X.12162
 
 Authors: Greta Bocedi & Steve Palmer, University of Aberdeen
 
-Last updated: 27 November 2020 by Anne-Kathleen Malchow, Potsdam University
+Last updated: 28 July 2021 by Greta Bocedi
 
 ------------------------------------------------------------------------------*/
 
@@ -53,16 +53,16 @@ using namespace std;
 #include "Model.h"
 
 struct batchfiles {
-	bool ok{};
-	int batchNum{};
-	int nSimuls{};
-	int nLandscapes{};
-	int patchmodel{}, resolution{}, landtype{}, maxNhab{}, speciesdist{}, distresolution{};
-	int reproductn{};
-	int repseasons{};
-	int stagestruct{}, stages{}, transfer{};
-	int sexesDem{};		// no. of explicit sexes for demographic model
-	int sexesDisp{};	// no. of explicit sexes for dispersal model
+	bool ok;
+	int batchNum;
+	int nSimuls;
+	int nLandscapes;
+	int patchmodel, resolution, landtype, maxNhab, speciesdist, distresolution;
+	int reproductn;
+	int repseasons;
+	int stagestruct, stages, transfer;
+	int sexesDem;		// no. of explicit sexes for demographic model
+	int sexesDisp;	// no. of explicit sexes for dispersal model
 	string parameterFile;
 	string landFile;
 	string stageStructFile;
